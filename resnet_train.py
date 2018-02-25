@@ -1,5 +1,6 @@
 from resnet import * 
 import tensorflow as tf
+import set_trace from pdb
 
 MOMENTUM = 0.9
 
