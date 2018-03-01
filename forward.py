@@ -14,11 +14,11 @@ graph = tf.get_default_graph()
 prob_tensor = graph.get_tensor_by_name("prob:0")
 images = graph.get_tensor_by_name("images:0")
 for op in graph.get_operations():
-    print op.name
+    print(op.name)
 
 #init = tf.initialize_all_variables()
 #sess.run(init)
-print "graph restored"
+print("graph restored")
 
 batch = img.reshape((1, 224, 224, 3))
 

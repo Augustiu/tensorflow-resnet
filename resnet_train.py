@@ -1,6 +1,7 @@
 from resnet import * 
 import tensorflow as tf
-import set_trace from pdb
+
+from pdb import set_trace
 
 MOMENTUM = 0.9
 
@@ -30,7 +31,7 @@ def train(is_training, logits, images, labels):
     val_step = tf.get_variable('val_step', [],
                                   initializer=tf.constant_initializer(0),
                                   trainable=False)
-
+    set_trace()
     loss_ = loss(logits, labels)
     predictions = tf.nn.softmax(logits)
 
@@ -83,9 +84,9 @@ def train(is_training, logits, images, labels):
     if FLAGS.resume:
         latest = tf.train.latest_checkpoint(FLAGS.train_dir)
         if not latest:
-            print "No checkpoint to continue from in", FLAGS.train_dir
+            print("No checkpoint to continue from in", FLAGS.train_dir)
             sys.exit(1)
-        print "resume", latest
+        print("resume", latest)
         saver.restore(sess, latest)
 
     for x in xrange(FLAGS.max_steps + 1):
