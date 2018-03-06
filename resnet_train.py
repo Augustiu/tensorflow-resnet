@@ -106,7 +106,7 @@ def train(is_training, logits, images, labels):
 
         assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
-        if step % 390 == 0:
+        if step % 100 == 0:
             examples_per_sec = FLAGS.batch_size / float(duration)
             format_str = ('step %d, loss = %.2f (%.1f examples/sec; %.3f '
                           'sec/batch)')

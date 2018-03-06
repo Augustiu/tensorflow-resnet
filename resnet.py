@@ -145,10 +145,10 @@ def _imagenet_preprocess(rgb):
 
 
 def loss(logits, labels):
-    #labels = tf.cast(labels, tf.int64)
-    #cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
-    #                                                                   labels=labels, name='cross_entropy_per_example')
-    cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits, labels)
+    labels = tf.cast(labels, tf.int64)
+    cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
+                                                                       labels=labels, name='cross_entropy_per_example')
+    #cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits, labels)
     cross_entropy_mean = tf.reduce_mean(cross_entropy)
  
     regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
