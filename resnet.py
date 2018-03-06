@@ -3,6 +3,7 @@ import skimage.transform  # bug. need to import this before tensorflow
 import tensorflow as tf
 from tensorflow.python.ops import control_flow_ops
 from tensorflow.python.training import moving_averages
+from pdb import set_trace
 
 from config import Config
 
@@ -101,7 +102,8 @@ def inference_small(x,
     c['fc_units_out'] = num_classes
     c['num_blocks'] = num_blocks
     c['num_classes'] = num_classes
-    inference_small_config(x, c)
+    x = inference_small_config(x, c)
+    return x
 
 def inference_small_config(x, c):
     c['bottleneck'] = False
@@ -115,7 +117,6 @@ def inference_small_config(x, c):
         x = bn(x, c)
         x = activation(x)
         x = stack(x, c)
-
     with tf.variable_scope('scale2'):
         c['block_filters_internal'] = 32
         c['stack_stride'] = 2
@@ -132,26 +133,28 @@ def inference_small_config(x, c):
     if c['num_classes'] != None:
         with tf.variable_scope('fc'):
             x = fc(x, c)
-
     return x
 
 
 def _imagenet_preprocess(rgb):
     """Changes RGB [0,1] valued image to BGR [0,255] with mean subtracted."""
     red, green, blue = tf.split(3, 3, rgb * 255.0)
-    bgr = tf.concat(3, [blue, green, red])
+    bgr = tf.concat([blue, green, red], 3)
     bgr -= IMAGENET_MEAN_BGR
     return bgr
 
 
 def loss(logits, labels):
+    #labels = tf.cast(labels, tf.int64)
+    #cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,
+    #                                                                   labels=labels, name='cross_entropy_per_example')
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits, labels)
     cross_entropy_mean = tf.reduce_mean(cross_entropy)
  
     regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
 
     loss_ = tf.add_n([cross_entropy_mean] + regularization_losses)
-    tf.scalar_summary('loss', loss_)
+    tf.summary.scalar('loss', loss_)
 
     return loss_
 

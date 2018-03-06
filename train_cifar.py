@@ -29,6 +29,8 @@ from resnet_train import train
 from resnet import inference_small
 import tensorflow as tf
 
+from pdb import set_trace
+
 DATA_URL = 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz'
 
 FLAGS = tf.app.flags.FLAGS
@@ -293,12 +295,12 @@ def main(argv=None):  # pylint: disable=unused-argument
     images_train, labels_train = distorted_inputs(FLAGS.data_dir, FLAGS.batch_size)
     images_val, labels_val = inputs(True, FLAGS.data_dir, FLAGS.batch_size)
 
+    #images = tf.placeholder(dtype=tf.float32, shape=[16, 32, 32, 3])
+    #labels = tf.placeholder(dtype=tf.int32, shape=[16])
     is_training = tf.placeholder('bool', [], name='is_training')
-
     images, labels = tf.cond(is_training,
         lambda: (images_train, labels_train),
         lambda: (images_val, labels_val))
-
     logits = inference_small(images,
                              num_classes=10,
                              is_training=is_training,
@@ -309,3 +311,4 @@ def main(argv=None):  # pylint: disable=unused-argument
 
 if __name__ == '__main__':
     tf.app.run()
+
