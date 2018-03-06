@@ -6,7 +6,7 @@ from pdb import set_trace
 MOMENTUM = 0.9
 
 FLAGS = tf.app.flags.FLAGS
-tf.app.flags.DEFINE_string('train_dir', '/tmp/resnet_train',
+tf.app.flags.DEFINE_string('train_dir', '/tmp/resnet_train_ckpt',
                            """Directory where to write event logs """
                            """and checkpoint.""")
 tf.app.flags.DEFINE_float('learning_rate', 0.1, "learning rate.")
@@ -16,7 +16,9 @@ tf.app.flags.DEFINE_boolean('resume', False,
                             'resume from latest saved state')
 tf.app.flags.DEFINE_boolean('minimal_summaries', True,
                             'produce fewer summaries to save HD space')
-
+tf.app.flags.DEFINE_boolean('is_use_ckpt', True,
+                            'Whether to load a checkpoint and continue training')
+tf.app.flags.DEFINE_string('ckpt_path', '/tmp/resnet_train/model.ckpt-5001', 'Checkpoint directory to restore')
 
 def top_k_error(predictions, labels, k):
     batch_size = float(FLAGS.batch_size) #tf.shape(predictions)[0]
@@ -75,7 +77,11 @@ def train(is_training, logits, images, labels):
     init = tf.initialize_all_variables()
 
     sess = tf.Session(config=tf.ConfigProto(log_device_placement=False))
-    sess.run(init)
+    if FLAGS.is_use_ckpt is True:
+        saver.restore(sess, FLAGS.ckpt_path)
+        print('Restored from checkpoint...')
+    else:
+        sess.run(init)
     tf.train.start_queue_runners(sess=sess)
 
     summary_writer = tf.summary.FileWriter(FLAGS.train_dir, sess.graph)
@@ -125,6 +131,3 @@ def train(is_training, logits, images, labels):
         if step > 1 and step % 1000== 0:
             _, top1_error_value = sess.run([val_op, top1_error], { is_training: False })
             print('Validation top1 error %.2f' % top1_error_value)
-
-
-
