@@ -16,9 +16,9 @@ tf.app.flags.DEFINE_boolean('resume', False,
                             'resume from latest saved state')
 tf.app.flags.DEFINE_boolean('minimal_summaries', True,
                             'produce fewer summaries to save HD space')
-tf.app.flags.DEFINE_boolean('is_use_ckpt', True,
+tf.app.flags.DEFINE_boolean('is_use_ckpt', False,
                             'Whether to load a checkpoint and continue training')
-tf.app.flags.DEFINE_string('ckpt_path', '/tmp/resnet_train/model.ckpt-5001', 'Checkpoint directory to restore')
+tf.app.flags.DEFINE_string('ckpt_path', '/tmp/resnet_train_ckpt/model.ckpt-11001', 'Checkpoint directory to restore')
 
 def top_k_error(predictions, labels, k):
     batch_size = float(FLAGS.batch_size) #tf.shape(predictions)[0]
@@ -98,7 +98,7 @@ def train(is_training, logits, images, labels):
         start_time = time.time()
 
         step = sess.run(global_step)
-        i = [train_op, loss_]
+        i = [train_op, loss_, top1_error_avg]
 
         write_summary = step % 1000 and step > 1
         if write_summary:
@@ -107,19 +107,19 @@ def train(is_training, logits, images, labels):
         o = sess.run(i, { is_training: True })
 
         loss_value = o[1]
-
+        top1_error_avg_value = o[2]
         duration = time.time() - start_time
 
         assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
         if step % 100 == 0:
             examples_per_sec = FLAGS.batch_size / float(duration)
-            format_str = ('step %d, loss = %.2f (%.1f examples/sec; %.3f '
+            format_str = ('step %d, loss = %.2f, top1_error_avg = %.5f (%.1f examples/sec; %.3f '
                           'sec/batch)')
-            print(format_str % (step, loss_value, examples_per_sec, duration))
+            print(format_str % (step, loss_value, top1_error_avg_value, examples_per_sec, duration))
 
         if write_summary:
-            summary_str = o[2]
+            summary_str = o[3]
             summary_writer.add_summary(summary_str, step)
 
         # Save the model checkpoint periodically.
@@ -129,5 +129,5 @@ def train(is_training, logits, images, labels):
 
         # Run validation periodically
         if step > 1 and step % 1000== 0:
-            _, top1_error_value = sess.run([val_op, top1_error], { is_training: False })
-            print('Validation top1 error %.2f' % top1_error_value)
+            _, loss_value, top1_error_value = sess.run([val_op, loss_, top1_error], { is_training: False })
+            print('Validation top1 error %.2f, loss %.5f' % top1_error_value, loss_value)

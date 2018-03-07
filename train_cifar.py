@@ -294,9 +294,6 @@ def main(argv=None):  # pylint: disable=unused-argument
 
     images_train, labels_train = distorted_inputs(FLAGS.data_dir, FLAGS.batch_size)
     images_val, labels_val = inputs(True, FLAGS.data_dir, FLAGS.batch_size)
-
-    #images = tf.placeholder(dtype=tf.float32, shape=[16, 32, 32, 3])
-    #labels = tf.placeholder(dtype=tf.int32, shape=[16])
     is_training = tf.placeholder('bool', [], name='is_training')
     images, labels = tf.cond(is_training,
         lambda: (images_train, labels_train),
